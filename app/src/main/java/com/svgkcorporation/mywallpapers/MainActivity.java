@@ -1,13 +1,12 @@
 package com.svgkcorporation.mywallpapers;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.view.Display;
 import android.view.View;
 import android.widget.Button;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,12 +26,14 @@ public class MainActivity extends AppCompatActivity {
             int height = Resources.getSystem().getDisplayMetrics().heightPixels;
             prefEditor.putInt("height",height);
             prefEditor.putInt("width",width);
-            prefEditor.commit();
+            prefEditor.apply();
         }
 
         Button previous,next;
         previous = findViewById(R.id.previous);
         next = findViewById(R.id.next);
+
+        WallpaperJobScheduler.scheduleJob(getApplicationContext());
 
         previous.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+//                Intent i = new Intent(MainActivity.this,WallpaperService.class);
+//                MainActivity.this.startService(i);
 
             }
         });

@@ -1,32 +1,26 @@
 package com.svgkcorporation.mywallpapers;
 
-import android.app.Service;
 import android.app.WallpaperManager;
-import android.content.Context;
-import android.content.Intent;
+import android.app.job.JobParameters;
+import android.app.job.JobService;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.IBinder;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
+public class WallpaperJobService extends JobService {
 
-public class WallpaperService extends Service {
-
-    private Context context;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i("aha", String.valueOf(Thread.currentThread().getId()));
+    private void changeWallpaper() {
         WallpaperManager manager = WallpaperManager.getInstance(this);
         SharedPreferences preferences = getSharedPreferences("RGBvalues", MODE_PRIVATE);
+        SharedPreferences.Editor prefEditor = preferences.edit();
         int height = preferences.getInt("height", 1920);
         int width = preferences.getInt("width", 1080);
         int red = preferences.getInt("RED", 126);
         int green = preferences.getInt("GREEN", 126);
         int blue = preferences.getInt("BLUE", 126);
+        prefEditor.putInt("BLUE", blue + 1);
+        prefEditor.apply();
         Log.d("TAG", "onCreate: " + red + " " + green + " " + blue);
         Bitmap bmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         int[] pixels = new int[height * width];
@@ -41,13 +35,19 @@ public class WallpaperService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        stopSelf();
     }
 
-    @Nullable
     @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    public boolean onStartJob(JobParameters jobParameters) {
+
+        changeWallpaper();
+
+        WallpaperJobScheduler.scheduleJob(getApplicationContext());
+        return true;
     }
 
+    @Override
+    public boolean onStopJob(JobParameters jobParameters) {
+        return true;
+    }
 }
