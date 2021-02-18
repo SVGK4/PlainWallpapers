@@ -1,9 +1,10 @@
 package com.svgkcorporation.mywallpapers;
 
+import android.app.job.JobScheduler;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,27 +30,23 @@ public class MainActivity extends AppCompatActivity {
             prefEditor.apply();
         }
 
-        Button previous,next;
-        previous = findViewById(R.id.previous);
-        next = findViewById(R.id.next);
+        Button start,stop;
+        start = findViewById(R.id.start);
+        stop = findViewById(R.id.stop);
 
-        WallpaperJobScheduler.scheduleJob(getApplicationContext());
 
-        previous.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-            }
+        start.setOnClickListener(view -> {
+            WallpaperJobScheduler.scheduleJob(getApplicationContext());
         });
 
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-//                Intent i = new Intent(MainActivity.this,WallpaperService.class);
-//                MainActivity.this.startService(i);
-
+        stop.setOnClickListener(view -> {
+            JobScheduler scheduler = (JobScheduler)this.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+            if(scheduler.getPendingJob(99999) != null)
+            {
+                scheduler.cancel(99999);
             }
+            
         });
 
     }

@@ -6,28 +6,53 @@ import android.app.job.JobService;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.util.Log;
 
 public class WallpaperJobService extends JobService {
 
-    private void changeWallpaper() {
-        WallpaperManager manager = WallpaperManager.getInstance(this);
+    public Bitmap createWallpaperBitmap() {
         SharedPreferences preferences = getSharedPreferences("RGBvalues", MODE_PRIVATE);
-        SharedPreferences.Editor prefEditor = preferences.edit();
+
         int height = preferences.getInt("height", 1920);
         int width = preferences.getInt("width", 1080);
         int red = preferences.getInt("RED", 126);
         int green = preferences.getInt("GREEN", 126);
         int blue = preferences.getInt("BLUE", 126);
-        prefEditor.putInt("BLUE", blue + 1);
-        prefEditor.apply();
-        Log.d("TAG", "onCreate: " + red + " " + green + " " + blue);
+
         Bitmap bmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         int[] pixels = new int[height * width];
         for (int i = 0; i < pixels.length; i++) {
             pixels[i] = Color.argb(255, red, green, blue);
         }
+
+        SharedPreferences.Editor prefEditor = preferences.edit();
+        blue++;
+        if(blue/256 == 1)
+        {
+            blue = 0;
+            green++;
+            if(green/256 == 1)
+            {
+                green = 0;
+                red++;
+                if(red == 256)
+                {
+                    red = 0;
+                    green = 0;
+                    blue = 0;
+                }
+            }
+        }
+        prefEditor.putInt("RED",red);
+        prefEditor.putInt("GREEN",green);
+        prefEditor.putInt("BLUE", blue);
+        prefEditor.apply();
         bmap.setPixels(pixels, 0, bmap.getWidth(), 0, 0, width, height);
+        return bmap;
+    }
+
+    public void changeWallpaper() {
+        WallpaperManager manager = WallpaperManager.getInstance(this);
+        Bitmap bmap = createWallpaperBitmap();
 
         try {
             manager.setBitmap(bmap, null, true, WallpaperManager.FLAG_LOCK);
